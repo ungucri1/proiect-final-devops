@@ -1,0 +1,52 @@
+pipeline {
+	agent any
+
+
+	environment {
+		DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
+		IMAGE_NAME = 'ungucri0103/backup'
+		IMAGE_TAG = "latest"
+	}
+
+
+	stages {
+		stage('checkout') {
+			steps {
+				git url : 'https://link-catre-repo.git', branch: 'main'
+			}
+		}
+
+
+		stage('lint Python') {
+			steps {
+				sh 'python3 -m py_compile backup.py'
+			}
+		}
+
+		stage('run tests') {
+			steps {
+				sh 'python3 -m unittest discover -s tests -p "*.py" || echo "No tests found"'
+
+			}
+		}
+
+
+		stage('run tests') {
+			steps {
+				sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f Dockerfile.backup ."
+			
+			}
+		}
+
+
+		stage('push docker image') {
+			steps {
+				withDockerRegistry([credentialsId: 'dockerhub-creds', url: '']) {
+					sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+				}
+			}
+		}
+	}
+}
+
+

@@ -1,0 +1,22 @@
+- name: Deploy monitoring platform
+  hosts: dockerhosts
+  become: yes
+  tasks:
+    - name: creeaza folderul pentru proiect
+      file:
+        path: /home/ansibleuser/proiect-final
+        state: directory
+        owner: ansibleuser
+        group: ansibleuser
+
+    - name: copiez fisierele de proiect pe VM-ul 2
+      copy:
+        src: ./
+        dest: /home/ansibleuser/proiect-final/
+        owner: ansibleuser
+        group: ansibleuser
+
+    - name: pornesc containerle cu docker compose
+      community.docker.docker_compose_v2:
+        project_src: /home/ansibleuser/proiect-final
+        state: present
