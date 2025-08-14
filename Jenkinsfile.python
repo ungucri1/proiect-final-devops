@@ -3,20 +3,12 @@ pipeline {
 
 
 	environment {
-		DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
 		IMAGE_NAME = 'ungucri0103/backup'
 		IMAGE_TAG = "latest"
 	}
 
 
 	stages {
-		stage('checkout') {
-			steps {
-				git url : 'https://link-catre-repo.git', branch: 'main'
-			}
-		}
-
-
 		stage('lint Python') {
 			steps {
 				sh 'python3 -m py_compile backup.py'
@@ -41,7 +33,7 @@ pipeline {
 
 		stage('push docker image') {
 			steps {
-				withDockerRegistry([credentialsId: 'dockerhub-creds', url: '']) {
+				withDockerRegistry([credentialsId: 'parola-dockerhub', url: '']) {
 					sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
 				}
 			}
