@@ -3,27 +3,48 @@ pipeline {
 
 
 	environment {
-		DOCKERHUB_USER = 'ungucri0103'
-		DOCKERHUB_PASS =  credentials('parola-dockerhub')
-		IMAGE_NAME = 'ungucri0103/monitor-script'
+		IMAGE_NAME = 'ungucri0103/monitor'
+		IMAGE_TAG = 'latest'
+		TARGET_HOST = '192.168.1.195'
+		TARGET_USER = 'ansibleuser'
+		REPO_URL 	= 'https://github.com/ungucri1/proiect-final-devops.git'
 	}
 
 
 	stages {
-		stage('build docker image') {
+		stage('lint bash') {
 			steps {
-				script {
-					sh 'docker build -t $IMAGE_NAME . -f Dockerfile.monitor' 
-				}
+				sh 'bash -n monitor.sh' 
+				
 			}
 		}
 
 
-		stage('push to dockerhub') {
+		stage('build & push pe target') {
 			steps {
-				script {
-					sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
-					sh 'docker push $IMAGE_NAME'
+				withCredentials([
+					usernamePassword(credentialsId: 'parola-dockerhub', usernameVariable: 'DH_USER', PasswordVariable: 'DH_PASS'),
+					sshUserPrivateKey(credentialsId: 'target-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
+				])  {
+					script {
+						def privateKeyText = readFile(file: "${SSH_KEY}")
+						def remote = [
+							name: 'target',
+							host: "${TARGET_HOST}",
+							user: "${SSH_USER}",
+							allowAnyHosts: true,
+							identity: privateKeyText
+						]
+
+						sshCommand remote: remote, command: "rm -rf ~/ci-build || true"
+						sshCommand remote: remote, command: "git clone ${REPO_URL} ~/ci-build"
+
+						sshCommand remote: remote, command: "cd ~/ci-build && docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f Dockerfile.monitor ."
+
+						sshCommand remote: remote, command: "echo '${DH_PASS}' | docker login -u '${DH_USER}' --passwword-stdin"
+						sshCommand remote: remote, command: "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+
+					}
 				}
 			}
 		}
