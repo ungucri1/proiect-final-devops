@@ -28,14 +28,20 @@ pipeline {
 
 		stage('build & push on target') {
 			steps {
-				withCredentials([usernamePassword(credentialsId: 'parola-dockerhub', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
-            	  script {
-            def remote = [:]
-            remote.name           = 'target'
-            remote.host           = "${TARGET_HOST}"
-            remote.user           = 'ansibleuser'
-            remote.allowAnyHosts  = true
-            remote.credentialsId  = 'target-ssh'
+        		withCredentials([
+          			usernamePassword(credentialsId: 'parola-dockerhub', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS'),
+          			sshUserPrivateKey(credentialsId: 'target-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
+        ]) {
+          script {
+            def privateKeyText = readFile(file: "${SSH_KEY}")
+
+            def remote = [
+              name:           'target',
+              host:           "${TARGET_HOST}",
+              user:           "${SSH_USER}",
+              allowAnyHosts:  true,
+              identity:       privateKeyText
+            ]
 
             sshCommand remote: remote, command: "rm -rf ~/ci-build || true"
             sshCommand remote: remote, command: "git clone ${REPO_URL} ~/ci-build"
