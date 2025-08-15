@@ -23,7 +23,7 @@ pipeline {
 		stage('build & push pe target') {
 			steps {
 				withCredentials([
-					usernamePassword(credentialsId: 'parola-dockerhub', usernameVariable: 'DH_USER', PasswordVariable: 'DH_PASS'),
+					usernamePassword(credentialsId: 'parola-dockerhub', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS'),
 					sshUserPrivateKey(credentialsId: 'target-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
 				])  {
 					script {
@@ -41,7 +41,7 @@ pipeline {
 
 						sshCommand remote: remote, command: "cd ~/ci-build && docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f Dockerfile.monitor ."
 
-						sshCommand remote: remote, command: "echo '${DH_PASS}' | docker login -u '${DH_USER}' --passwword-stdin"
+						sshCommand remote: remote, command: "echo '${DH_PASS}' | docker login -u '${DH_USER}' --password-stdin"
 						sshCommand remote: remote, command: "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
 
 					}
