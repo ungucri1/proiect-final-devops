@@ -29,19 +29,19 @@ pipeline {
 		stage('build & push on target') {
 			steps {
 				withCredentials([usernamePassword(credentialsId: 'parola-dockerhub', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
-            	  sshagent(['target-ssh']) {
-					sh """
-					  set -e
-					  ssh -o StrictHostKeyChecking=no ${TARGET_USER}@${TARGET_HOST} '
-					  	set -e
-					  	rm -rf ~/ci-build || true
-					  	git clone ${REPO_URL} ~/ci-build
-					  	cd ~/ci-build
-					  	docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f Dockerfile.backup .
-					  	echo "${DH_PASS}" | docker login -u "${DH_USER}" --password-stdin
-						docker push ${IMAGE_NAME}:${IMAGE_TAG}
-						'
-            """
+            	  script {
+            def remote = [:]
+            remote.name           = 'target'
+            remote.host           = "${TARGET_HOST}"
+            remote.user           = 'ansibleuser'
+            remote.allowAnyHosts  = true
+            remote.credentialsId  = 'target-ssh'
+
+            sshCommand remote: remote, command: "rm -rf ~/ci-build || true"
+            sshCommand remote: remote, command: "git clone ${REPO_URL} ~/ci-build"
+            sshCommand remote: remote, command: "cd ~/ci-build && docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f Dockerfile.backup ."
+            sshCommand remote: remote, command: "echo '${DH_PASS}' | docker login -u '${DH_USER}' --password-stdin"
+            sshCommand remote: remote, command: "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
           }
         }
       }
