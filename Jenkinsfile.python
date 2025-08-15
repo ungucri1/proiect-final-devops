@@ -26,15 +26,7 @@ pipeline {
 		}
 
 
-		stage('build imagine docker') {
-			steps {
-				sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f Dockerfile.backup ."
-			
-			}
-		}
-
-
-		stage(build and push on target') {
+		stage('build & push on target') {
 			steps {
 				withCredentials([usernamePassword(credentialsId: 'parola-dockerhub', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
             	  sshagent(['target-ssh']) {
