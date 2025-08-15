@@ -4,7 +4,10 @@ pipeline {
 
 	environment {
 		IMAGE_NAME = 'ungucri0103/backup'
-		IMAGE_TAG = "latest"
+		IMAGE_TAG = 'latest'
+		TARGET_HOST = '192.168.1.195'
+		TARGET_USER = 'ansibleuser'
+		REPO_URL 	= 'https://github.com/ungucri1/proiect-final-devops.git'
 	}
 
 
@@ -31,14 +34,25 @@ pipeline {
 		}
 
 
-		stage('push docker image') {
+		stage(build and push on target') {
 			steps {
-				withDockerRegistry([credentialsId: 'parola-dockerhub', url: '']) {
-					sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
-				}
-			}
-		}
-	}
+				withCredentials([usernamePassword(credentialsId: 'parola-dockerhub', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
+            	  sshagent(['target-ssh']) {
+					sh """
+					  set -e
+					  ssh -o StrictHostKeyChecking=no ${TARGET_USER}@${TARGET_HOST} '
+					  	set -e
+					  	rm -rf ~/ci-build || true
+					  	git clone ${REPO_URL} ~/ci-build
+					  	cd ~/ci-build
+					  	docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f Dockerfile.backup .
+					  	echo "${DH_PASS}" | docker login -u "${DH_USER}" --password-stdin
+						docker push ${IMAGE_NAME}:${IMAGE_TAG}
+						'
+            """
+          }
+        }
+      }
+    }
+  }
 }
-
-
