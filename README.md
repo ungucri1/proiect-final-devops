@@ -6,7 +6,7 @@
  - `/jenkins` : [definiri de pipeline]
 
 ## Setup & Rulare
-#1) Cerinte
+**#1) Cerinte**
  - masina host
  - masina target
  - tool-uri necesare pe masina host:
