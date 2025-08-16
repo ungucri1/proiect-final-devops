@@ -6,9 +6,9 @@ services:
       dockerfile: Dockerfile
     container_name: monitorcontainer
     environment:
-      - SYSTEM_INTERVAL=5
+       SYSTEM_INTERVAL: "5"
     volumes:
-      - ../:/app
+      - ..:/app
     working_dir: /app
 
   backup:
@@ -17,8 +17,8 @@ services:
       dockerfile: Dockerfile
     container_name: backup-container
     environment:
-      - BACKUP_INTERVAL: "5"
-      - BACKUP_DIR: backup
+       BACKUP_INTERVAL: "5"
+       BACKUP_DIR: "backup"
     volumes:
       - ..:/app
     working_dir: /app
