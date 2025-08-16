@@ -144,11 +144,11 @@ docker logs -n 50 backup-container
 docker compose down
 ```
 - Pe VM-ul target:
-  ```bash
+```bash
  ssh ansibleuser@192.168.1.195
  docker compose -f /home/ansibleuser/proiect-final/compose/docker-compose.yml up -d --build
  docker compose -f /home/ansibleuser/proiect-final/compose/docker-compose.yml ps
-  ```
+```
 
 - Ansible:
  ```bash
