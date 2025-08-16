@@ -157,6 +157,6 @@ Avem cate unul pe fiecare componenta:
  ```
 
 - Resurse:
-  - Docker: COPY & context - documentatia oficiala te ajuta sa eviti erorile de context
-  - Ansible community.docker collection (pentru taskul de compose)
+  - Docker: `COPY` & context - documentatia oficiala te ajuta sa eviti erorile de context
+  - Ansible `community.docker` collection (pentru taskul de compose)
   - [Sintaxa Markdown](https://www.markdownguide.org/cheat-sheet/)
