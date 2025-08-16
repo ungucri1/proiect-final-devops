@@ -70,5 +70,24 @@ Avem cate unul pe fiecare componenta:
      docker build -t ungucri0103/backup:latest -f app/backup/Dockerfile app/backup
     -Login si push in Docker Hub.
 
+- Credentiale in Jenkins
+   - Github(deja configurat la job - credentiale Github)
+   - Docker Hub: parola-dockerhub(user si parola)
+   - SSH spre target: target-ssh(SSH user cu cheia privata)
+     - username: ansibleuser
+     - cheia privata folosita de Ansible
+   - In Jenkins se foloseste pluginul SSH steps si binding de credentiale
+     
+ - Permisiuni & useri Jenkins
+    - Realm: baza de date Jenkins
+    - Matrix based security: user dedicat userproiect cu permisiuni minime pentru joburile proiectului(React/Build)
+    - View dedicat "ProiectFinal" cu cele doua joburi incluse
+      
+  - Trigger
+    - Poti porni manual fiecare pipeline
+    - (Optional) POLL SCM daca vrei build la commit fara webhooks publice
+    
+     
+
 
 
