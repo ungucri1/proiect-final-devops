@@ -11,12 +11,12 @@
 
     - name: copiez fisierele de proiect pe VM-ul 2
       copy:
-        src: ./
+        src: "{{ playbook_dir }}/.."
         dest: /home/ansibleuser/proiect-final/
         owner: ansibleuser
         group: ansibleuser
 
     - name: pornesc containerle cu docker compose
       community.docker.docker_compose_v2:
-        project_src: /home/ansibleuser/proiect-final
+        project_src: /home/ansibleuser/proiect-final/compose
         state: present

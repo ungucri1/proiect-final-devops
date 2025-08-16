@@ -2,23 +2,23 @@
 services:
   monitor:
     build:
-      context: .
-      dockerfile: Dockerfile.monitor
+      context: ../app/monitor
+      dockerfile: Dockerfile
     container_name: monitorcontainer
     environment:
       - SYSTEM_INTERVAL=5
     volumes:
-      - .:/app
+      - ../:/app
     working_dir: /app
 
   backup:
     build:
-      context: .
-      dockerfile: Dockerfile.backup
+      context: ../app/monitor
+      dockerfile: Dockerfile
     container_name: backup-container
     environment:
       - BACKUP_INTERVAL=5
       - BACKUP_DIR=backup
     volumes:
-      - .:/app
+      - ../:/app
     working_dir: /app
