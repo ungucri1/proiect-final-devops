@@ -86,7 +86,38 @@ Avem cate unul pe fiecare componenta:
   - Trigger
     - Poti porni manual fiecare pipeline
     - (Optional) POLL SCM daca vrei build la commit fara webhooks publice
-    
+
+## Depanare / erori cunoscute 
+
+- `docker: not found` in Jenkins
+  Nu rulam build pe Jenkins; rulam pe target prin SSH(solutia deja implementata)
+- `permission denied /var/run/docker.sock` pe target
+  Adauga ansibleuser in grupul docker si da reboot:
+
+  ```bash
+  sudo usermod -aG docker ansibleuser
+  sudo reboot
+  ```
+- `COPY file ... not found` la build
+  Contextul de build trebuie sa fie directorul in care exista fisierul copiat (De aceea folosim ` ...-f app/backup/Dockerfile app/backup` si `... -f app/monitor/Dockerfile/app/monitor`.)
+- Unit tests
+  Daca nu ai test, comanda din pipeline nu va pica buildul:
+
+  ```bash
+
+  python3 -m unittest discover -s app/backup/tests -p "*.py" || echo "No tests found"
+   ```
+- Compose "container name is already in use"
+  In playbook exista task-uri care opresc containerele vechi inainte de compose up. Daca rulezi manual, sterge-le:
+
+  ```bash
+
+  docker rm -f backup-container monitorcontainer || true
+   ```
+  
+
+
+  
      
 
 
