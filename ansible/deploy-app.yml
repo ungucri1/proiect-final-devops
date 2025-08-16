@@ -2,21 +2,65 @@
   hosts: dockerhosts
   become: yes
   tasks:
-    - name: creeaza folderul pentru proiect
+    - name: remove proiect vechi
       file:
         path: /home/ansibleuser/proiect-final
+        state: absent
+
+    - name: creeaza structura folder proiect
+      file:
+        path: "{{ item }}"
         state: directory
         owner: ansibleuser
         group: ansibleuser
+        mode: "0755"
+      loop:
+        - /home/ansibleuser/proiect-final
+        - /home/ansibleuser/proiect-final/compose
+        - /home/ansibleuser/proiect-final/app
 
-    - name: copiez fisierele de proiect pe VM-ul 2
+    - name: copiez dir compose
       copy:
-        src: "{{ playbook_dir }}/.."
-        dest: /home/ansibleuser/proiect-final/
+        src: "{{ playbook_dir }}/../compose/"
+        dest: /home/ansibleuser/proiect-final/compose/
         owner: ansibleuser
         group: ansibleuser
+        mode: "0755"
+
+    - name: copiez dir app
+      copy:
+        src: "{{ playbook_dir }}/../app/"
+        dest: /home/ansibleuser/proiect-final/app/
+        owner: ansibleuser
+        group: ansibleuser
+        mode: "0755"
+
+    - name: check docker-compose.yml este pe tarhet
+      stat:
+        path: /home/ansibleuser/proiect-final/compose/docker-compose.yml
+      register: dc
+
+    - name: fail daca nu este docker-compose
+      fail:
+        msg: "docker-compose.yml nu este in calea /home/ansibleuser/proiect-final/compose"
+      when: not dc.stat.exists
+
+    - name: opresc cantainer vechi backup (daca e necesar)
+      community.docker.docker_container:
+        name: backup-container
+        state: absent
+      ignore_errors: true
+
+    - name: opresc cantainer vechi monitor (daca e necesar)
+      community.docker.docker_container:
+        name: monitorcontainer
+        state: absent
+      ignore_errors: true
 
     - name: pornesc containerle cu docker compose
       community.docker.docker_compose_v2:
         project_src: /home/ansibleuser/proiect-final/compose
         state: present
+        pull: always
+        build: always
+        remove_orphans: true

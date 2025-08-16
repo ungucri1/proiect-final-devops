@@ -14,13 +14,13 @@ pipeline {
 	stages {
 		stage('lint Python') {
 			steps {
-				sh 'python3 -m py_compile backup.py'
+				sh 'python3 -m py_compile app/backup/backup.py'
 			}
 		}
 
 		stage('run tests') {
 			steps {
-				sh 'python3 -m unittest discover -s tests -p "*.py" || echo "No tests found"'
+				sh 'python3 -m unittest discover -s app/backup/tests -p "*.py" || echo "No tests found"'
 
 			}
 		}
@@ -45,7 +45,7 @@ pipeline {
 
             sshCommand remote: remote, command: "rm -rf ~/ci-build || true"
             sshCommand remote: remote, command: "git clone ${REPO_URL} ~/ci-build"
-            sshCommand remote: remote, command: "cd ~/ci-build/app/backup && docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+            sshCommand remote: remote, command: "cd ~/ci-build && docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f app/backup/Dockerfile ."
             sshCommand remote: remote, command: "echo '${DH_PASS}' | docker login -u '${DH_USER}' --password-stdin"
             sshCommand remote: remote, command: "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
           }

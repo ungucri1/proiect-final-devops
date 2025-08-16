@@ -13,12 +13,13 @@ services:
 
   backup:
     build:
-      context: ../app/monitor
+      context: ../app/backup
       dockerfile: Dockerfile
     container_name: backup-container
     environment:
-      - BACKUP_INTERVAL=5
-      - BACKUP_DIR=backup
+      - BACKUP_INTERVAL: "5"
+      - BACKUP_DIR: backup
     volumes:
-      - ../:/app
+      - ..:/app
     working_dir: /app
+    command: python app/backup/backup.py

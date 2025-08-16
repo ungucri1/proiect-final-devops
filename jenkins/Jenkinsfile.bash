@@ -14,7 +14,7 @@ pipeline {
 	stages {
 		stage('lint bash') {
 			steps {
-				sh 'bash -n monitor.sh' 
+				sh 'bash -n app/monitor/monitor.sh' 
 				
 			}
 		}
@@ -39,7 +39,7 @@ pipeline {
 						sshCommand remote: remote, command: "rm -rf ~/ci-build || true"
 						sshCommand remote: remote, command: "git clone ${REPO_URL} ~/ci-build"
 
-						sshCommand remote: remote, command: "cd ~/ci-build/app/monitor && docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+						sshCommand remote: remote, command: "cd ~/ci-build && docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f app/monitor/Dockerfile ."
 
 						sshCommand remote: remote, command: "echo '${DH_PASS}' | docker login -u '${DH_USER}' --password-stdin"
 						sshCommand remote: remote, command: "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
