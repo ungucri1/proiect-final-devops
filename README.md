@@ -1,5 +1,4 @@
 ## Structura Proiectului
-
 /app/monitor - aplicatia de monitorizare si dockerfile
 /app/monitor - aplicatia de backup si dockerfile
 /compose - un compose care porneste ambele local sau remote via Ansible
@@ -42,13 +41,34 @@ Ce face:
 - opreste containere vechi (daca exista).
 - ruleaza docker compose up --build -d pe target.
 
+Comenzi de verificare pe VM-ul target:
+ssh ansibleuser@192.168.1.195
+docker compose -f /home/ansibleuser/proiect-final/compose/docker-compose.yml ps
+docker logs -n 50 monitorcontainer
+docker logs -n 50 backup-container
+ls -l /home/ansibleuser/proiect-final/backup
+
+## CI/CD și Automatizari
+
+Pipeline-uri
+
+Avem cate unul pe fiecare componenta:
+
+- pipeline_monitor_bash — folosește jenkins/Jenkinsfile.bash:
+    -Lint shell: bash -n app/monitor/monitor.sh
+    -SSH pe target => clone repo
+    -Build imagine pe target cu context app/monitor:
+     docker build -t ungucri0103/monitor:latest -f app/monitor/Dockerfile app/monitor
+    -Login si push in Docker Hub.
 
 
-
-
-
-
-
+- Pipeline_backup_python — folosește jenkins/Jenkinsfile.python:
+    -Lint python: python3 -m py_compile app/backup/backup.py
+    -Tests: python3 -m unittest discover -s app/backup/tests -p "*.py" || echo "No tests found"
+    -SSH pe target => clone repo
+    -Build imagine pe target cu context app/backup:
+     docker build -t ungucri0103/backup:latest -f app/backup/Dockerfile app/backup
+    -Login si push in Docker Hub.
 
 
 
