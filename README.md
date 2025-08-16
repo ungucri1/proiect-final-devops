@@ -6,47 +6,65 @@
  - `/jenkins` : [definiri de pipeline]
 
 ## Setup & Rulare
-**#1) Cerinte**
- - masina host
- - masina target
+**1) Cerinte**
+ - masina *host*
+ - masina *target*
  - tool-uri necesare pe masina host:
-       - git,ansible,ssh,docker
+       - `git`,`ansible`,`ssh`,`docker`
  - tool-uri necesare pe asina target:
        - docker si docker compose v2
-       - user: ansibleuser
-       - IMPORTANT: ansibleuser trebuie adaugat in grupul de docker, pentru a rula comenzi fara sudo.(sudo usermod -aG docker ansibleuser)
+       - user: `ansibleuser`
+       - IMPORTANT: `ansibleuser` trebuie adaugat in grupul de `docker`, pentru a rula comenzi fara sudo.
+ ```bash
+sudo usermod -aG docker ansibleuser
+```
+**2) Config Ansible**
+Editeaza `ansible/inventory.ini`:
 
-#2) Config Ansible
-Editeaza ansible/inventory.ini:
+```ini
 [dockerhosts]
 target ansible_host=192.168.1.195 ansible_user=ansibleuser
-Cheia SSH publica a hostului trebuie sa fie in ~ansibleuser/.ssh/authorized_keys pe VM-ul target
-Comanda de test: ansible -i ansible/inventory.ini dockerhosts -m ping
+```
 
-#3) Rulare locala (pas optional)
+Cheia SSH publica a hostului trebuie sa fie in ~ansibleuser/.ssh/authorized_keys pe VM-ul target
+
+Comanda de test:
+ ```bash
+ansible -i ansible/inventory.ini dockerhosts -m ping
+```
+
+**3) Rulare locala (pas optional)**
 Din directorul proiectului rulam urmatoarele comenzi:
+```bash
 cd compose
 docker compose up --build -d
 docker compose ps
 docker logs -n 50 monitorcontainer
 docker logs -n 50 backup-container
+```
 
-#4) Deploy pe VM cu Ansible
+**4) Deploy pe VM cu Ansible**
 executam comanda:
+
+```bash
 ansible-playbook -i ansible/inventory.ini ansible/deploy-app.yml
+```
 Ce face:
 - sterge orice versiune veche a proiectului pe target.
-- creeaza structura /home/ansibleuser/proiect-final/{compose,app}.
-- copiaza directoarele compose/ si app/ pe target.
+- creeaza structura `/home/ansibleuser/proiect-final/{compose,app}.`
+- copiaza directoarele `compose/` si `app/` pe target.
 - opreste containere vechi (daca exista).
-- ruleaza docker compose up --build -d pe target.
+- ruleaza `docker compose up --build -d` pe target.
 
 Comenzi de verificare pe VM-ul target:
+
+```bash
 ssh ansibleuser@192.168.1.195
 docker compose -f /home/ansibleuser/proiect-final/compose/docker-compose.yml ps
 docker logs -n 50 monitorcontainer
 docker logs -n 50 backup-container
 ls -l /home/ansibleuser/proiect-final/backup
+```
 
 ## CI/CD și Automatizari
 
@@ -54,38 +72,38 @@ Pipeline-uri
 
 Avem cate unul pe fiecare componenta:
 
-- pipeline_monitor_bash — folosește jenkins/Jenkinsfile.bash:
-    -Lint shell: bash -n app/monitor/monitor.sh
-    -SSH pe target => clone repo
-    -Build imagine pe target cu context app/monitor:
-     docker build -t ungucri0103/monitor:latest -f app/monitor/Dockerfile app/monitor
-    -Login si push in Docker Hub.
+- pipeline_monitor_bash — folosește `jenkins/Jenkinsfile.bash`:
+    - Lint shell: `bash -n app/monitor/monitor.sh`
+    - SSH pe target => clone repo
+    - Build imagine pe target cu context `app/monitor`:
+     `docker build -t ungucri0103/monitor:latest -f app/monitor/Dockerfile app/monitor`
+    - Login si push in Docker Hub.
 
 
-- Pipeline_backup_python — folosește jenkins/Jenkinsfile.python:
-    -Lint python: python3 -m py_compile app/backup/backup.py
-    -Tests: python3 -m unittest discover -s app/backup/tests -p "*.py" || echo "No tests found"
+- Pipeline_backup_python — `folosește jenkins/Jenkinsfile.python`:
+    -Lint python: `python3 -m py_compile app/backup/backup.py`
+    -Tests: `python3 -m unittest discover -s app/backup/tests -p "*.py" || echo "No tests found"`
     -SSH pe target => clone repo
-    -Build imagine pe target cu context app/backup:
-     docker build -t ungucri0103/backup:latest -f app/backup/Dockerfile app/backup
+    -Build imagine pe target cu context `app/backup`:
+     `docker build -t ungucri0103/backup:latest -f app/backup/Dockerfile app/backup`
     -Login si push in Docker Hub.
 
 - Credentiale in Jenkins
    - Github(deja configurat la job - credentiale Github)
-   - Docker Hub: parola-dockerhub(user si parola)
-   - SSH spre target: target-ssh(SSH user cu cheia privata)
-     - username: ansibleuser
+   - Docker Hub: `parola-dockerhub`(user si parola)
+   - SSH spre target: `target-ssh`(SSH user cu cheia privata)
+     - `username: ansibleuser`
      - cheia privata folosita de Ansible
    - In Jenkins se foloseste pluginul SSH steps si binding de credentiale
      
  - Permisiuni & useri Jenkins
     - Realm: baza de date Jenkins
-    - Matrix based security: user dedicat userproiect cu permisiuni minime pentru joburile proiectului(React/Build)
+    - Matrix based security: user dedicat `userproiect` cu permisiuni minime pentru joburile proiectului(React/Build)
     - View dedicat "ProiectFinal" cu cele doua joburi incluse
       
   - Trigger
     - Poti porni manual fiecare pipeline
-    - (Optional) POLL SCM daca vrei build la commit fara webhooks publice
+    - (Optional) `POLL SCM` daca vrei build la commit fara webhooks publice
 
 ## Depanare / erori cunoscute 
 
@@ -117,21 +135,27 @@ Avem cate unul pe fiecare componenta:
 
   ## Comenzi utile
 
-Local din folderul compose:
+- Local din folderul compose:
+```bash
 docker compose up --build -d
 docker compose ps
 docker logs -n 50 monitorcontainer
 docker logs -n 50 backup-container
 docker compose down
+```
 
-Pe VM-ul target:
+- Pe VM-ul target:
+  ```bash
 ssh ansibleuser@192.168.1.195
 docker compose -f /home/ansibleuser/proiect-final/compose/docker-compose.yml up -d --build
 docker compose -f /home/ansibleuser/proiect-final/compose/docker-compose.yml ps
+ ```
 
-Ansible:
+- Ansible:
+```bash
 ansible -i ansible/inventory.ini dockerhosts -m ping
 ansible-playbook -i ansible/inventory.ini ansible/deploy-app.yml
+```
 
 Resurse:
 Docker:COPY & context - documentatia oficiala te ajuta sa eviti erorile de context
