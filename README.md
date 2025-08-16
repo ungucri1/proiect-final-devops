@@ -1,9 +1,9 @@
 ## Structura Proiectului
-/app/monitor - aplicatia de monitorizare si dockerfile
-/app/monitor - aplicatia de backup si dockerfile
-/compose - un compose care porneste ambele local sau remote via Ansible
-/ansible - deploy pe VM (copiaza intregul repository si face compose up)
-/jenkins - definiri de pipeline
+ - `/app/monitor` : [aplicatia de monitorizare si dockerfile]
+ - `/app/monitor` : [aplicatia de backup si dockerfile]
+ - `/compose` : [un compose care porneste ambele local sau remote via Ansible]
+ - `/ansible` : [deploy pe VM (copiaza intregul repository si face compose up)]
+ - `/jenkins` : [definiri de pipeline]
 
 ## Setup & Rulare
 #1) Cerinte
