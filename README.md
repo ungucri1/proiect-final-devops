@@ -136,27 +136,26 @@ Avem cate unul pe fiecare componenta:
   ## Comenzi utile
 
 - Local din folderul compose:
-```bash
-docker compose up --build -d
-docker compose ps
-docker logs -n 50 monitorcontainer
-docker logs -n 50 backup-container
-docker compose down
-```
+ ```bash
+  docker compose up --build -d
+  docker compose ps
+  docker logs -n 50 monitorcontainer
+  docker logs -n 50 backup-container
+  docker compose down
+ ```
 - Pe VM-ul target:
-```bash
- ssh ansibleuser@192.168.1.195
- docker compose -f /home/ansibleuser/proiect-final/compose/docker-compose.yml up -d --build
- docker compose -f /home/ansibleuser/proiect-final/compose/docker-compose.yml ps
-```
+ ```bash
+  ssh ansibleuser@192.168.1.195
+  docker compose -f /home/ansibleuser/proiect-final/compose/docker-compose.yml up -d --build
+  docker compose -f /home/ansibleuser/proiect-final/compose/docker-compose.yml ps
+ ```
 
 - Ansible:
  ```bash
- ansible -i ansible/inventory.ini dockerhosts -m ping
- ansible-playbook -i ansible/inventory.ini ansible/deploy-app.yml
+  ansible -i ansible/inventory.ini dockerhosts -m ping
+  ansible-playbook -i ansible/inventory.ini ansible/deploy-app.yml
  ```
 
 - Resurse:
-Docker:COPY & context - documentatia oficiala te ajuta sa eviti erorile de context
-Ansible community.docker collection (pentru taskul de compose
-[Sintaxa Markdown](https://www.markdownguide.org/cheat-sheet/)
+  - Docker:COPY & context - documentatia oficiala te ajuta sa eviti erorile de context
+  - Ansible community.docker collection (pentru taskul de compose[Sintaxa Markdown](https://www.markdownguide.org/cheat-sheet/)
